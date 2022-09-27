@@ -7,7 +7,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
@@ -29,16 +28,16 @@ public class NettyServer {
     serverBootstrap.group(bossGroup, workerGroup)
         // 5. 设置服务端通道实现为NIO
         .channel(NioServerSocketChannel.class)
-        // 6. 参数设置
+        // 6. Boss参数设置.初始化服务端可连接队列
         .option(ChannelOption.SO_BACKLOG, 128)
-        // 活跃状态
+        // 6.1 child参数设置。两个服务之间使用心跳来检测对方是否还活着
+        //https://ihui.ink/post/netty/channel-options/
         .childOption(ChannelOption.SO_KEEPALIVE, Boolean.TRUE)
         // 7. 创建一个通道初始化对象
         .childHandler(new ChannelInitializer<>() {
           @Override
           protected void initChannel(Channel ch) throws Exception {
             // 8. 向pipeline中添加自定义业务处理handler
-            //Todo:     --Add By Master 2022/09/23 16:57
             ch.pipeline().addLast(new NettyServerHandler());
           }
         });
